@@ -4,6 +4,8 @@ import MarketSelector from '@/components/MarketSelector'
 import TopMovers from '@/components/TopMovers'
 import OrderbookDepth from '@/components/OrderbookDepth'
 import TradesFeed from '@/components/TradesFeed'
+import { useOrderbookStream } from '@/hooks/useOrderbookStream'
+import { useTradesStream } from '@/hooks/useTradesStream'
 import YieldsPanel from '@/components/YieldsPanel'
 
 export default function DashboardPage() {
@@ -23,19 +25,17 @@ export default function DashboardPage() {
       .catch(() => {})
   }, [])
 
-  useEffect(() => {
-    if (!selected) return
-    const params = new URLSearchParams({ marketId: selected })
-    fetch(`/api/orderbook?${params.toString()}`)
-      .then((r) => r.json())
-      .then((d) => setOrderbook({ bids: d?.bids ?? [], asks: d?.asks ?? [] }))
-      .catch(() => {})
+  // use real-time streams when available
+  const streamedOrderbook = useOrderbookStream(selected)
+  const streamedTrades = useTradesStream(selected)
 
-    fetch(`/api/trades?${params.toString()}`)
-      .then((r) => r.json())
-      .then((d) => setTrades(d ?? []))
-      .catch(() => {})
-  }, [selected])
+  useEffect(() => {
+    if (streamedOrderbook) setOrderbook(streamedOrderbook)
+  }, [streamedOrderbook])
+
+  useEffect(() => {
+    if (streamedTrades && streamedTrades.length) setTrades(streamedTrades)
+  }, [streamedTrades])
 
   useEffect(() => {
     fetch('/api/yields')
