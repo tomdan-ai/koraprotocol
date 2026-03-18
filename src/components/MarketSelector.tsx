@@ -1,5 +1,6 @@
 'use client'
 import React from 'react'
+import { ChevronDown } from 'lucide-react'
 
 type Props = {
   markets: any[]
@@ -10,12 +11,12 @@ type Props = {
 export default function MarketSelector({ markets = [], value, onChange }: Props) {
   return (
     <div className="w-full">
-      <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-200">Market</label>
-      <div className="mt-2">
+      <label className="block text-xs font-semibold tracking-wide text-zinc-600 dark:text-zinc-300">Market</label>
+      <div className="mt-2 relative">
         <select
           value={value}
           onChange={(e) => onChange?.(e.target.value)}
-          className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:bg-[#0b0b0b] dark:border-zinc-800"
+          className="appearance-none w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm shadow-sm transition-shadow duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:bg-[#071018] dark:border-zinc-800 dark:text-zinc-100"
         >
           {markets.map((m) => (
             <option key={m.id ?? m.marketId ?? m.base} value={m.id ?? m.marketId ?? `${m.base}-${m.quote}`}>
@@ -23,6 +24,9 @@ export default function MarketSelector({ markets = [], value, onChange }: Props)
             </option>
           ))}
         </select>
+        <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-zinc-400">
+          <ChevronDown size={16} />
+        </div>
       </div>
     </div>
   )
