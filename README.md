@@ -34,3 +34,23 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Smart Contract (CosmWasm)
+
+This repo includes a CosmWasm smart contract in the `contract/` directory that stores a user's DCA strategy on-chain.
+
+### Build
+
+```bash
+# from repo root
+cd contract
+cargo build
+```
+
+### Docker optimized build
+
+```bash
+docker run --rm -v "$(pwd)/contract:/code" -w /code cosmwasm/rust-optimizer:0.16.0
+```
+
+After deploying the contract, set `NEXT_PUBLIC_VAULT_CONTRACT_ADDRESS` in `.env` so the frontend can interact with it.
