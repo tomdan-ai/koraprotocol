@@ -54,3 +54,9 @@ docker run --rm -v "$(pwd)/contract:/code" -w /code cosmwasm/rust-optimizer:0.16
 ```
 
 After deploying the contract, set `NEXT_PUBLIC_VAULT_CONTRACT_ADDRESS` in `.env` so the frontend can interact with it.
+
+Copy the example env file and customize values:
+
+```bash
+cp .env.example .env
+```

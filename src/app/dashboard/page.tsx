@@ -7,6 +7,7 @@ import TradesFeed from '@/components/TradesFeed'
 import { useOrderbookStream } from '@/hooks/useOrderbookStream'
 import { useTradesStream } from '@/hooks/useTradesStream'
 import YieldsPanel from '@/components/YieldsPanel'
+import StrategyVault from '@/components/StrategyVault'
 
 export default function DashboardPage() {
   const [markets, setMarkets] = useState<any[]>([])
@@ -76,6 +77,9 @@ export default function DashboardPage() {
           </div>
 
           <aside className="flex flex-col gap-6">
+            <div className="rounded-3xl bg-white/5 dark:bg-black/40 backdrop-blur-xl border border-white/10 dark:border-white/5 shadow-2xl p-6 transition-all duration-300 hover:border-cyan-500/30 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12),0_0_20px_rgba(6,182,212,0.1)]">
+               <StrategyVault />
+            </div>
             <div className="rounded-3xl bg-white/5 dark:bg-black/40 backdrop-blur-xl border border-white/10 dark:border-white/5 shadow-2xl p-6 transition-all duration-300 hover:border-purple-500/30 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12),0_0_20px_rgba(168,85,247,0.1)] flex-1">
                <TopMovers markets={markets} onSelect={(id) => setSelected(id)} />
             </div>
