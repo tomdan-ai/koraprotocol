@@ -16,11 +16,13 @@ function Navbar({
   selectedMarket,
   onMarketChange,
   marketsLoading,
+  onBack,
 }: {
   markets: Market[]
   selectedMarket: Market | null
   onMarketChange: (m: Market) => void
   marketsLoading: boolean
+  onBack?: () => void
 }) {
   const [walletConnected, setWalletConnected] = useState(false)
   const [walletAddress, setWalletAddress]     = useState<string | null>(null)
@@ -75,8 +77,26 @@ function Navbar({
         zIndex: 50,
       }}
     >
-      {/* Logo */}
+      {/* Logo + back */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 160 }}>
+        {onBack && (
+          <button
+            onClick={onBack}
+            title="Back to home"
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer', padding: '4px 6px',
+              color: 'var(--text-2)', borderRadius: 'var(--r-sm)',
+              display: 'flex', alignItems: 'center',
+              transition: 'color var(--dur-sm)',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-1)')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-2)')}
+          >
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+        )}
         <img
           src="/kora.png"
           alt="Kora"
@@ -85,7 +105,7 @@ function Navbar({
         />
         <div>
           <div style={{ fontFamily: 'var(--font-ui)', fontWeight: 600, fontSize: 13, color: 'var(--text-1)', lineHeight: 1 }}>
-            Kora Protocol
+            Injective Protocol
           </div>
           <div style={{ fontFamily: 'var(--font-ui)', fontSize: 10, color: 'var(--text-2)', lineHeight: 1.2, marginTop: 1 }}>
             Modern Crypto Trading Dashboard
@@ -423,7 +443,7 @@ function MarketDataPanel({
 }
 
 /* ─── Main Dashboard ────────────────────────────────────────────────────── */
-export default function Dashboard() {
+export default function Dashboard({ onBack }: { onBack?: () => void }) {
   const { markets, loading: marketsLoading, error: marketsError } = useMarkets()
   const [selectedMarket, setSelectedMarket] = useState<Market | null>(null)
   const [aiTradeRequest, setAiTradeRequest] = useState<{ action: 'buy' | 'sell'; quantity: number } | null>(null)
@@ -467,6 +487,7 @@ export default function Dashboard() {
         selectedMarket={selectedMarket}
         onMarketChange={handleMarketChange}
         marketsLoading={marketsLoading}
+        onBack={onBack}
       />
 
       {/* Error banner */}
@@ -602,7 +623,7 @@ export default function Dashboard() {
             {marketsLoading ? 'Loading markets…' : 'Select a market to begin'}
           </div>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-3)' }}>
-            {NETWORK} · Kora Protocol
+            {NETWORK} · Injective Protocol
           </div>
         </div>
       )}
