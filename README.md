@@ -1,62 +1,178 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+**Injective Mini Dashboard**
+============================
 
-## Getting Started
+A lightweight, real-time dashboard built with **React, TailwindCSS, and the Injective TS SDK**, designed to provide a clean and fast view of Injective spot market data.\
+This project was created for the **HackQuest x Injective 2025 Builder Break: Chill Building Weeks**.
 
-First, run the development server:
+**Overview**
+------------
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+The Injective Mini Dashboard is a small but functional demo that interacts directly with the Injective **testnet** using the official `@injectivelabs/sdk-ts` library.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+It provides:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+-   Live Injective **spot market list**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+-   **Orderbook** (bids & asks) refreshed in real-time
 
-## Learn More
+-   **Market selection**
 
-To learn more about Next.js, take a look at the following resources:
+-   A modular architecture for extending more Injective features such as live trades, simulated orders, price charts, and wallet integrations
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Even as a minimal build, it demonstrates full Injective integration and is suitable for hackathons, tutorials, or onboarding new developers into the Injective ecosystem.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**Features**
+------------
 
-## Deploy on Vercel
+### **Core Features**
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+-   Fetches Injective spot markets from the **Indexer REST API**
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+-   Displays best bids/asks (orderbook) with auto-refresh
 
-## Smart Contract (CosmWasm)
+-   Allows switching between Injective markets
 
-This repo includes a CosmWasm smart contract in the `contract/` directory that stores a user's DCA strategy on-chain.
+-   Clean UI using TailwindCSS
 
-### Build
+-   Modular React components and hooks
 
-```bash
-# from repo root
-cd contract
-cargo build
-```
+### **Injective-Specific Integrations**
 
-### Docker optimized build
+-   Injective Indexer Rest Client
 
-```bash
-docker run --rm -v "$(pwd)/contract:/code" -w /code cosmwasm/rust-optimizer:0.16.0
-```
+-   Real on-chain market data
 
-After deploying the contract, set `NEXT_PUBLIC_VAULT_CONTRACT_ADDRESS` in `.env` so the frontend can interact with it.
+-   Real-time orderbook updates every 3 seconds
 
-Copy the example env file and customize values:
+### **Future Extensions (Supported by current architecture)**
 
-```bash
-cp .env.example .env
-```
+-   Trading simulator using real orderbook data
+
+-   Lightweight price charts
+
+-   Wallet connect (Keplr)
+
+**Tech Stack**
+--------------
+
+| Layer | Technology |
+| --- | --- |
+| Framework | React (Vite) |
+| Styling | TailwindCSS |
+| API | `@injectivelabs/sdk-ts` |
+| Language | TypeScript |
+| Network | Injective Testnet |
+
+**Live Data Source**
+--------------------
+
+The dashboard uses the official Injective testnet indexer endpoint:
+
+`https://testnet.sentry.exchange.grpc-web.injective.network  `
+
+**Installation & Setup**
+------------------------
+
+### **1\. Clone the Repository**
+
+`git clone https://github.com/BarsilNzola/injective-mini-dashboard.git cd injective-mini-dashboard `
+
+### **2\. Install Dependencies**
+
+`npm install `
+
+### **3\. Run the Development Server**
+
+`npm run dev `
+
+### **4\. Build for Production**
+
+`npm run build `
+
+**Injective Client Configuration**
+----------------------------------
+
+Located in `src/api/injectiveClient.js`:
+
+`import { IndexerRestClient } from  "@injectivelabs/sdk-ts"; export  const indexer = new  IndexerRestClient( "https://testnet.sentry.exchange.grpc-web.injective.network" ); `
+
+This initializes your global SDK client for any component/hook to use.
+
+**Key Hooks**
+-------------
+
+### **useMarkets.js**
+
+Fetches all Injective spot markets:
+
+`const spot = await indexer.getSpotMarkets({}); `
+
+### **useOrderbook.js**
+
+Fetches and updates orderbook every 3 seconds:
+
+`const ob = await indexer.getSpotOrderbook(marketId); `
+
+**How It Works**
+----------------
+
+1.  The dashboard loads all spot markets using `useMarkets()`
+
+2.  User selects a market from the dropdown (or the first market loads by default)
+
+3.  `useOrderbook()` fetches bids & asks for that market
+
+4.  The hook auto-refreshes the book every 3 seconds
+
+5.  UI components update live without page reload
+
+**Why This Project Matters**
+----------------------------
+
+This demo fulfills the Injective Builder Break requirement by:
+
+-   Using Injective's official SDK
+
+-   Interacting with real on-chain data
+
+-   Implementing a working frontend that visualizes Injective markets
+
+-   Providing a foundation for more complex Injective applications
+
+It's small, fast, and practical --- exactly what the Builder Break encourages.
+
+
+**Potential Improvements**
+--------------------------
+
+If you continue building, here are recommended enhancements:
+
+-   Add wallet connect (Keplr)
+
+-   Add simulated trading using live orderbook
+
+-   Add derivatives markets
+
+-   Add theme switcher (dark/light)
+
+
+**License**
+-----------
+
+MIT License. Feel free to fork, modify, and build on top of it.
+
+**Credits**
+-----------
+
+Built by **Barsil Nzola**\
+For **HackQuest x Injective Builder Break 2025**
+
+Powered by:
+
+-   Injective Labs
+
+-   HackQuest
+
+-   HackQuest Africa
+
+-   NinjaLabs
