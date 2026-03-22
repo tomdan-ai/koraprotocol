@@ -1,81 +1,143 @@
-'use client'
-import React, { useState, useRef, useEffect } from 'react'
-import { ChevronDown, BarChart2 } from 'lucide-react'
+import { Market } from '../types'
+import Loader from './Loader'
+import { useMemo } from 'react'
 
-type Props = {
-  markets: any[]
-  value?: string
-  onChange?: (m: string) => void
+interface MarketSelectorProps {
+  markets: Market[]
+  selectedMarket: Market | null
+  onMarketChange: (market: Market) => void
+  loading: boolean
+  error: string | null
 }
 
-export default function MarketSelector({ markets = [], value, onChange }: Props) {
-  const [isOpen, setIsOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
+export default function MarketSelector({
+  markets,
+  selectedMarket,
+  onMarketChange,
+  loading,
+  error,
+}: MarketSelectorProps) {
+  const isInitialLoad = loading && markets.length === 0
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+  const groupedMarkets = useMemo(() => ({
+    spot:        markets.filter(m => m.marketType === 'spot'),
+    derivatives: markets.filter(m => m.marketType === 'derivative'),
+  }), [markets])
 
-  const selectedMarket = markets.find(m => (m.id ?? m.marketId ?? `${m.base}-${m.quote}`) === value)
-  const displayLabel = selectedMarket 
-    ? (selectedMarket.name ?? selectedMarket.marketId ?? `${selectedMarket.base}/${selectedMarket.quote}`)
-    : 'Select Market'
+  const handleMarketChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const market = markets.find(m => m.id === e.target.value)
+    if (market) onMarketChange(market)
+  }
 
   return (
-    <div className="relative w-full z-50" ref={dropdownRef}>
-      <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between gap-3 px-4 py-2.5 bg-white/5 dark:bg-black/40 backdrop-blur-md border border-white/10 dark:border-white/10 rounded-xl shadow-lg transition-all duration-300 hover:border-cyan-500/50 hover:bg-white/10 dark:hover:bg-white/5 group"
-      >
-        <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-md bg-cyan-500/20 text-cyan-400 group-hover:scale-110 transition-transform">
-            <BarChart2 size={16} />
+    <div
+      className="panel"
+      style={{ padding: '14px 20px', marginBottom: 20 }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+        {/* Label */}
+        <div style={{ minWidth: 0 }}>
+          <div
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 'var(--text-xs)',
+              color: 'var(--ink-3)',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              marginBottom: 2,
+            }}
+          >
+            Market
           </div>
-          <span className="font-semibold text-zinc-800 dark:text-zinc-100">{displayLabel}</span>
-        </div>
-        <ChevronDown 
-          size={18} 
-          className={`text-zinc-400 transition-transform duration-300 ${isOpen ? 'rotate-180 text-cyan-400' : ''}`} 
-        />
-      </button>
-
-      {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 p-1 bg-white/70 dark:bg-[#0a0a0a]/80 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.2)] max-h-64 overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
-          {markets.length === 0 ? (
-            <div className="p-3 text-sm text-center text-zinc-500">Loading markets...</div>
-          ) : (
-            markets.map((m) => {
-              const val = m.id ?? m.marketId ?? `${m.base}-${m.quote}`
-              const label = m.name ?? m.marketId ?? `${m.base}/${m.quote}`
-              const isSelected = val === value
-
-              return (
-                <button
-                  key={val}
-                  type="button"
-                  onClick={() => {
-                    onChange?.(val)
-                    setIsOpen(false)
-                  }}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-sm transition-all duration-200 ${
-                    isSelected 
-                      ? 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-semibold' 
-                      : 'text-zinc-700 dark:text-zinc-300 hover:bg-black/5 dark:hover:bg-white/5'
-                  }`}
-                >
-                  <div className={`w-2 h-2 rounded-full ${isSelected ? 'bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.8)]' : 'bg-transparent'}`} />
-                  {label}
-                </button>
-              )
-            })
+          {error && (
+            <div style={{ fontSize: 'var(--text-xs)', color: 'var(--signal-sell)', marginTop: 2 }}>
+              {error}
+            </div>
           )}
+        </div>
+
+        {/* Select */}
+        <div style={{ flex: 1, minWidth: 200, maxWidth: 340, position: 'relative' }}>
+          {isInitialLoad ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Loader size="sm" />
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-sm)', color: 'var(--ink-3)' }}>
+                Loading markets…
+              </span>
+            </div>
+          ) : (
+            <>
+              <select
+                value={selectedMarket?.id || ''}
+                onChange={handleMarketChange}
+                disabled={markets.length === 0}
+                aria-label="Select market"
+                className="kora-select"
+              >
+                <option value="">Select market…</option>
+                {groupedMarkets.spot.length > 0 && (
+                  <optgroup label="Spot">
+                    {groupedMarkets.spot.map(m => (
+                      <option key={m.id} value={m.id}>{m.ticker}</option>
+                    ))}
+                  </optgroup>
+                )}
+                {groupedMarkets.derivatives.length > 0 && (
+                  <optgroup label="Derivatives">
+                    {groupedMarkets.derivatives.map(m => (
+                      <option key={m.id} value={m.id}>{m.ticker}</option>
+                    ))}
+                  </optgroup>
+                )}
+              </select>
+              {/* Chevron */}
+              <svg
+                style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--ink-3)' }}
+                width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </>
+          )}
+        </div>
+
+        {/* Selected market badge */}
+        {selectedMarket && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginLeft: 'auto' }}>
+            <span
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 'var(--text-sm)',
+                color: 'var(--ink-1)',
+                fontWeight: 500,
+              }}
+            >
+              {selectedMarket.ticker}
+            </span>
+            <span className="badge badge-mono">
+              {selectedMarket.marketType === 'spot' ? 'Spot' : 'Perp'}
+            </span>
+            {!isInitialLoad && loading && <Loader size="sm" />}
+          </div>
+        )}
+      </div>
+
+      {/* Meta row */}
+      {selectedMarket && (
+        <div
+          style={{
+            marginTop: 10,
+            paddingTop: 10,
+            borderTop: '1px solid var(--border-subtle)',
+            display: 'flex',
+            gap: 20,
+            fontFamily: 'var(--font-mono)',
+            fontSize: 'var(--text-xs)',
+            color: 'var(--ink-4)',
+          }}
+        >
+          <span>tick <span style={{ color: 'var(--ink-2)' }}>{selectedMarket.minPriceTickSize}</span></span>
+          <span>min qty <span style={{ color: 'var(--ink-2)' }}>{selectedMarket.minQuantityTickSize}</span></span>
         </div>
       )}
     </div>
